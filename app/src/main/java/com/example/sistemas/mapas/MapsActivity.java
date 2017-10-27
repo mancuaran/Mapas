@@ -9,6 +9,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -51,28 +52,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
 
         DatosApi service = retrofit.create(DatosApi.class);
-        Call<List<Cai>> municipioCall=service.obtenerListaCai();
+        Call<List<Cai>> caiCall=service.obtenerListaCai();
 
-        municipioCall.enqueue(new Callback<List<Cai>>() {
+        caiCall.enqueue(new Callback<List<Cai>>() {
             @Override
             public void onResponse(Call<List<Cai>> call, Response<List<Cai>> response) {
 
                 if(response.isSuccessful()){
 
-                    List listaMunicipios= response.body();
-                    for (int i=0;i<listaMunicipios.size();i++){
+                    List listaCai= response.body();
+                    for (int i=0;i<listaCai.size();i++){
 
-                        Cai m= (Cai) listaMunicipios.get(i);
-                        // Add a marker in Sydney and move the camera
-                        LatLng sydney = new LatLng(m.getLatitud(),m.getLongitud());
-                        mMap.addMarker(new MarkerOptions().position(sydney).title(m.getNombre()));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,10));
+                        Cai m= (Cai) listaCai.get(i);
+
+                        //Agregar los marcadores en los puntos de la lista llamada
+                        LatLng marcador = new LatLng(m.getLatitud(),m.getLongitud());
+                        mMap.addMarker(new MarkerOptions()
+                                .position(marcador).title(m.getNombre())
+                                .snippet(m.getUbicacion())
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_name)));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marcador,12));
 
 
+                        //Agregar botones de Zoom
                         mMap.getUiSettings().setZoomControlsEnabled(true);
+
 
                     }
 
